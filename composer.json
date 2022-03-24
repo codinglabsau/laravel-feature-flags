@@ -1,0 +1,64 @@
+{
+    "name": "codinglabsau/laravel-feature-flags",
+    "description": "Dynamic feature flags for laravel.",
+    "keywords": [
+        "Codinglabs",
+        "laravel",
+        "Feature",
+        "Flags",
+        "laravel-feature-flags"
+    ],
+    "homepage": "https://github.com/codinglabsau/laravel-feature-flags",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Steve Thomas",
+            "email": "steve@codinglabs.com.au",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.4|^8.0",
+        "spatie/laravel-package-tools": "^1.9.2",
+        "illuminate/contracts": "^7.0|^8.0|^9.0"
+    },
+    "require-dev": {
+        "nunomaduro/collision": "^6.0",
+        "orchestra/testbench": "^7.0",
+        "pestphp/pest": "^1.21",
+        "pestphp/pest-plugin-laravel": "^1.1",
+        "phpunit/phpunit": "^9.5",
+        "spatie/laravel-ray": "^1.26"
+    },
+    "autoload": {
+        "psr-4": {
+            "Codinglabs\\FeatureFlags\\": "src",
+            "Codinglabs\\FeatureFlags\\Database\\Factories\\": "database/factories"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Codinglabs\\FeatureFlags\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "analyse": "vendor/bin/phpstan analyse",
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Codinglabs\\FeatureFlags\\FeatureFlagsServiceProvider"
+            ],
+            "aliases": {
+                "Features": "Codinglabs\\FeatureFlags\\Facades\\Features"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
