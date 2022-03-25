@@ -7,14 +7,18 @@ beforeEach(function() {
     cache()->flush();
 
     config([
-        'features.cache_prefix' => 'testing',
-        'features.cache_store' => 'array',
+        'feature-flags.cache_prefix' => 'testing',
+        'feature-flags.cache_store' => 'array',
     ]);
 });
 
+it('generates the correct cache key', function () {
+    expect(FeatureFlags::getFeatureKey('some-feature'))->toBe('testing.some-feature');
+});
+
 it('feature is not enabled if it does not exist', function () {
-    expect(FeatureFlags::enabled('some-feature'))->toBeFalse();
-    expect(cache()->driver('array')->get('testing.some-feature'))->toBeNull();
+    expect(FeatureFlags::isEnabled('some-feature'))->toBeFalse();
+    expect(cache()->driver(config('feature-flags.cache_store'))->get('testing.some-feature'))->toBeNull();
 });
 
 it('feature is not enabled if state is off', function () {
@@ -23,8 +27,8 @@ it('feature is not enabled if state is off', function () {
         'state' => 'off'
     ]);
 
-    expect(FeatureFlags::enabled('some-feature'))->toBeFalse();
-    expect(cache()->driver('array')->get('testing.some-feature'))->toBe('off');
+    expect(FeatureFlags::isEnabled('some-feature'))->toBeFalse();
+    expect(cache()->driver(config('feature-flags.cache_store'))->get('testing.some-feature'))->toBe('off');
 });
 
 it('feature is enabled if restricted and closure returns true', function () {
@@ -33,14 +37,14 @@ it('feature is enabled if restricted and closure returns true', function () {
         'state' => 'restricted'
     ]);
 
-    FeatureFlags::restrictFeature('some-feature', function($feature) {
+    FeatureFlags::restrictFeatureWith('some-feature', function($feature) {
         expect($feature)->toBe('some-feature');
 
         return true;
     });
 
-    expect(FeatureFlags::enabled('some-feature'))->toBeTrue();
-    expect(cache()->driver('array')->get('testing.some-feature'))->toBe('restricted');
+    expect(FeatureFlags::isEnabled('some-feature'))->toBeTrue();
+    expect(cache()->driver(config('feature-flags.cache_store'))->get('testing.some-feature'))->toBe('restricted');
 });
 
 it('feature is not enabled if restricted and closure returns false', function () {
@@ -49,12 +53,12 @@ it('feature is not enabled if restricted and closure returns false', function ()
         'state' => 'restricted'
     ]);
 
-    FeatureFlags::restrictFeature('some-feature', function($feature) {
+    FeatureFlags::restrictFeatureWith('some-feature', function($feature) {
         expect($feature)->toBe('some-feature');
 
         return false;
     });
 
-    expect(FeatureFlags::enabled('some-feature'))->toBeFalse();
-    expect(cache()->driver('array')->get('testing.some-feature'))->toBe('restricted');
+    expect(FeatureFlags::isEnabled('some-feature'))->toBeFalse();
+    expect(cache()->driver(config('feature-flags.cache_store'))->get('testing.some-feature'))->toBe('restricted');
 });
