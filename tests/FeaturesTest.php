@@ -66,7 +66,7 @@ it('resolves isEnabled to true when feature state is "restricted" and the closur
         'state' => FeatureState::dynamic(),
     ]);
 
-    FeatureFlag::registerDynamicHandler('some-feature', function($feature) {
+    FeatureFlag::registerDynamicHandler('some-feature', function ($feature) {
         return true;
     });
 
@@ -80,7 +80,7 @@ it('resolves isEnabled to false when feature state is "restricted" and the closu
         'state' => FeatureState::dynamic(),
     ]);
 
-    FeatureFlag::registerDynamicHandler('some-feature', function($feature) {
+    FeatureFlag::registerDynamicHandler('some-feature', function ($feature) {
         return false;
     });
 
@@ -94,7 +94,7 @@ it('uses the default restricted closure if no feature specific closure has been 
         'state' => FeatureState::dynamic(),
     ]);
 
-    FeatureFlag::registerDefaultDynamicHandler(function() {
+    FeatureFlag::registerDefaultDynamicHandler(function () {
         return true;
     });
 
@@ -111,7 +111,7 @@ it('resolves isEnabled to false when feature state is "restricted" and no restri
     expect(FeatureFlag::isEnabled('some-feature'))->toBeFalse();
 });
 
-it ('can update a features state', function () {
+it('can update a features state', function () {
     Event::fake();
 
     Feature::factory()->create([

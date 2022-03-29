@@ -29,10 +29,11 @@ class FeatureFlags
     {
         $parts = [config('feature-flags.cache_prefix'), $feature];
 
-        return implode('.' , array_filter($parts, 'strlen'));
+        return implode('.', array_filter($parts, 'strlen'));
     }
 
-    private static function getFeatureModel(string $feature): ?Model {
+    private static function getFeatureModel(string $feature): ?Model
+    {
         if ($featureModel = config('feature-flags.feature_model')::firstWhere('name', $feature)) {
             return $featureModel;
         }

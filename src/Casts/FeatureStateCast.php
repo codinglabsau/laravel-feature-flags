@@ -8,7 +8,6 @@ use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 
 class FeatureStateCast implements CastsAttributes
 {
-
     public function get($model, string $key, $value, array $attributes)
     {
         return FeatureState::from($attributes['state']);
