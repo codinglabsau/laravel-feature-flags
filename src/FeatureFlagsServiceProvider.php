@@ -2,7 +2,10 @@
 
 namespace Codinglabs\FeatureFlags;
 
+use Illuminate\Support\Facades\Blade;
 use Spatie\LaravelPackageTools\Package;
+use Codinglabs\FeatureFlags\Models\Feature;
+use Codinglabs\FeatureFlags\Facades\FeatureFlag;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Codinglabs\FeatureFlags\Commands\FeaturesCommand;
 
@@ -19,5 +22,19 @@ class FeatureFlagsServiceProvider extends PackageServiceProvider
             ->name('laravel-feature-flags')
             ->hasConfigFile()
             ->hasMigration('create_features_table');
+    }
+
+    public function packageRegistered()
+    {
+        $this->app->singleton('features', function () {
+            return new FeatureFlags();
+        });
+    }
+
+    public function packageBooted()
+    {
+        Blade::if('feature', function ($value) {
+            return FeatureFlag::isEnabled($value);
+        });
     }
 }

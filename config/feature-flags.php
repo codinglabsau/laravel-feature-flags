@@ -7,7 +7,7 @@ return [
     | Cache
     |--------------------------------------------------------------------------
     |
-    | Configure the cache driver that will be used to cache the state of a
+    | Configure the cache store that will be used to cache the state of a
     | feature. You can also configure a prefix for all keys in the cache.
     */
 
@@ -20,8 +20,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | If you need to customise any models used then you can swap them out by
-    | replacing the default models defined here. Make sure you extend the
-    | feature model if you do choose to create a custom model.
+    | replacing the default models defined here.
     */
 
     'feature_model' => \Codinglabs\FeatureFlags\Models\Feature::class,

@@ -18,9 +18,11 @@
         }
     ],
     "require": {
-        "php": "^7.4|^8.0",
-        "spatie/laravel-package-tools": "^1.9.2",
-        "illuminate/contracts": "^7.0|^8.0|^9.0"
+        "php": "^8.0",
+        "codinglabsau/php-styles": "dev-main",
+        "illuminate/contracts": "^7.0|^8.0|^9.0",
+        "spatie/enum": "^3.12",
+        "spatie/laravel-package-tools": "^1.9.2"
     },
     "require-dev": {
         "nunomaduro/collision": "^6.0",
@@ -55,7 +57,7 @@
                 "Codinglabs\\FeatureFlags\\FeatureFlagsServiceProvider"
             ],
             "aliases": {
-                "Features": "Codinglabs\\FeatureFlags\\Facades\\Features"
+                "FeatureFlag": "Codinglabs\\FeatureFlags\\Facades\\FeatureFlags"
             }
         }
     },

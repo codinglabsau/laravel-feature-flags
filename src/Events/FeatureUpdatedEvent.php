@@ -2,12 +2,14 @@
 
 namespace Codinglabs\FeatureFlags\Events;
 
+use Illuminate\Database\Eloquent\Model;
+
 class FeatureUpdatedEvent extends Event
 {
-    public $feature;
+    public Model $feature;
 
-    public function __construct(string $feature)
+    public function __construct(Model $feature)
     {
-        $this->feature = config('feature-flags.feature_model')::where('name', $feature)->first();
+        $this->feature = $feature;
     }
 }
