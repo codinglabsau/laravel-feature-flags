@@ -11,7 +11,8 @@ return [
     | feature. You can also configure a prefix for all keys in the cache.
     */
 
-    'cache_store' => env('FEATURES_CACHE_STORE'),
+    'cache_store' => env('FEATURES_CACHE_STORE', config('cache.default')),
+
     'cache_prefix' => 'features',
 
     /*

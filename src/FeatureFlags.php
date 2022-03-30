@@ -18,7 +18,7 @@ class FeatureFlags
 
     private static function cache(): Repository
     {
-        return Cache::store(config('feature-flags.cache_store'));
+        return Cache::store(config('feature-flags.cache_store', config('cache.default')));
     }
 
     public static function getFeatureCacheKey(string $feature): string
@@ -69,7 +69,7 @@ class FeatureFlags
         self::$handleMissingFeatureClosure = $closure;
     }
 
-    public static function isEnabled(string $feature): bool
+    public static function isOn(string $feature): bool
     {
         return match (self::getState($feature)) {
             FeatureState::on() => true,

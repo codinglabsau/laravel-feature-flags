@@ -18,10 +18,10 @@ afterEach(function () {
     FeatureFlag::reset();
 });
 
-it('throws an exception if calling isEnabled for a feature that does not exist', function () {
+it('throws an exception if calling isOn for a feature that does not exist', function () {
     $this->expectException(MissingFeatureException::class);
 
-    FeatureFlag::isEnabled('some-feature');
+    FeatureFlag::isOn('some-feature');
     expect(cache()->store('array')->get('testing.some-feature'))->toBeNull();
 });
 
@@ -36,31 +36,31 @@ it('handles a missing feature exception when a global handler has been defined',
         // handling...
     });
 
-    expect(FeatureFlag::isEnabled('some-feature'))->toBeFalse();
+    expect(FeatureFlag::isOn('some-feature'))->toBeFalse();
     expect(cache()->store('array')->get('testing.some-feature'))->toBeNull();
 });
 
-it('resolves isEnabled to false when the features state is "off"', function () {
+it('resolves isOn to false when the features state is "off"', function () {
     Feature::factory()->create([
         'name' => 'some-feature',
         'state' => FeatureState::off()
     ]);
 
-    expect(FeatureFlag::isEnabled('some-feature'))->toBeFalse();
+    expect(FeatureFlag::isOn('some-feature'))->toBeFalse();
     expect(cache()->store('array')->get('testing.some-feature'))->toBe(FeatureState::off()->value);
 });
 
-it('resolves isEnabled to true when the features state is "on"', function () {
+it('resolves isOn to true when the features state is "on"', function () {
     Feature::factory()->create([
         'name' => 'some-feature',
         'state' => FeatureState::on()
     ]);
 
-    expect(FeatureFlag::isEnabled('some-feature'))->toBeTrue();
+    expect(FeatureFlag::isOn('some-feature'))->toBeTrue();
     expect(cache()->store('array')->get('testing.some-feature'))->toBe(FeatureState::on()->value);
 });
 
-it('resolves isEnabled to true when feature state is "restricted" and the closure returns true', function () {
+it('resolves isOn to true when feature state is "dynamic" and the closure returns true', function () {
     Feature::factory()->create([
         'name' => 'some-feature',
         'state' => FeatureState::dynamic(),
@@ -70,11 +70,11 @@ it('resolves isEnabled to true when feature state is "restricted" and the closur
         return true;
     });
 
-    expect(FeatureFlag::isEnabled('some-feature'))->toBeTrue();
+    expect(FeatureFlag::isOn('some-feature'))->toBeTrue();
     expect(cache()->store('array')->get('testing.some-feature'))->toBe(FeatureState::dynamic()->value);
 });
 
-it('resolves isEnabled to false when feature state is "restricted" and the closure returns false', function () {
+it('resolves isOn to false when feature state is "dynamic" and the closure returns false', function () {
     Feature::factory()->create([
         'name' => 'some-feature',
         'state' => FeatureState::dynamic(),
@@ -84,11 +84,11 @@ it('resolves isEnabled to false when feature state is "restricted" and the closu
         return false;
     });
 
-    expect(FeatureFlag::isEnabled('some-feature'))->toBeFalse();
+    expect(FeatureFlag::isOn('some-feature'))->toBeFalse();
     expect(cache()->store('array')->get('testing.some-feature'))->toBe(FeatureState::dynamic()->value);
 });
 
-it('uses the default restricted closure if no feature specific closure has been defined', function () {
+it('uses the default dynamic closure if no feature specific closure has been defined', function () {
     Feature::factory()->create([
         'name' => 'some-feature',
         'state' => FeatureState::dynamic(),
@@ -98,17 +98,17 @@ it('uses the default restricted closure if no feature specific closure has been 
         return true;
     });
 
-    expect(FeatureFlag::isEnabled('some-feature'))->toBeTrue();
+    expect(FeatureFlag::isOn('some-feature'))->toBeTrue();
     expect(cache()->store('array')->get('testing.some-feature'))->toBe(FeatureState::dynamic()->value);
 });
 
-it('resolves isEnabled to false when feature state is "restricted" and no restricted closure has been defined', function () {
+it('resolves isOn to false when feature state is "dynamic" and no dynamic closure has been defined', function () {
     Feature::factory()->create([
         'name' => 'some-feature',
         'state' => FeatureState::dynamic(),
     ]);
 
-    expect(FeatureFlag::isEnabled('some-feature'))->toBeFalse();
+    expect(FeatureFlag::isOn('some-feature'))->toBeFalse();
 });
 
 it('can update a features state', function () {
@@ -124,6 +124,14 @@ it('can update a features state', function () {
     FeatureFlag::updateFeatureState('some-feature', FeatureState::on());
 
     Event::assertDispatched(\Codinglabs\FeatureFlags\Events\FeatureUpdatedEvent::class);
-    expect(FeatureFlag::isEnabled('some-feature'))->toBeTrue();
+    expect(FeatureFlag::isOn('some-feature'))->toBeTrue();
     expect(cache()->store('array')->get('testing.some-feature'))->toBe(FeatureState::on()->value);
+});
+
+it('uses the default cache store when cache store has not been set', function() {
+    config(['cache.default' => 'file']);
+
+    config(['feature-flags.cache_store' => env('FEATURES_CACHE_STORE', config('cache.default'))]);
+
+    expect(config('feature-flags.cache_store'))->toBe('file');
 });

@@ -27,7 +27,7 @@ class FeatureFlagsServiceProvider extends PackageServiceProvider
     public function packageBooted()
     {
         Blade::if('feature', function ($value) {
-            return FeatureFlag::isEnabled($value);
+            return FeatureFlag::isOn($value);
         });
     }
 }

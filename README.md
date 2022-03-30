@@ -95,7 +95,7 @@ FeatureState::dynamic()
 ```php
 use Codinglabs\FeatureFlags\Facades\FeatureFlag;
 
-if (FeatureFlag::isEnabled('search-v2')) {
+if (FeatureFlag::isOn('search-v2')) {
     // new feature code
 } else {
     // old code
@@ -178,7 +178,7 @@ If a handler for missing features has been defined then an exception will **not*
 Inertia::share([
     'features' => function () {
         return collect(config('app.features'))
-            ->filter(fn ($feature) => FeatureFlag::isEnabled($feature['name']))
+            ->filter(fn ($feature) => FeatureFlag::isOn($feature['name']))
             ->pluck('name');
     }
 ]);
