@@ -12,10 +12,6 @@ use Codinglabs\FeatureFlags\Exceptions\MissingFeatureException;
 
 class FeatureFlags
 {
-    const STATE_ON = 'on';
-    const STATE_OFF = 'off';
-    const STATE_DYNAMIC = 'dynamic';
-
     private static ?Closure $defaultDynamicHandler = null;
     private static ?Closure $handleMissingFeatureClosure = null;
     public static array $dynamicHandlers = [];
@@ -75,26 +71,22 @@ class FeatureFlags
 
     public static function isEnabled(string $feature): bool
     {
-        $state = self::getState($feature);
+        return match (self::getState($feature)) {
+            FeatureState::on() => true,
+            FeatureState::off() => false,
+            FeatureState::dynamic() => call_user_func(
+                function () use ($feature) {
+                    if (array_key_exists($feature, self::$dynamicHandlers)) {
+                        return call_user_func(self::$dynamicHandlers[$feature], $feature, request()) === true;
+                    } elseif (is_callable(self::$defaultDynamicHandler)) {
+                        return call_user_func(self::$defaultDynamicHandler, $feature, request()) === true;
+                    }
 
-        switch ($state) {
-            case FeatureState::on():
-                return true;
-            case FeatureState::off():
-                return false;
-            case FeatureState::dynamic():
-            {
-                if (array_key_exists($feature, self::$dynamicHandlers)) {
-                    return self::$dynamicHandlers[$feature]($feature, request()) === true;
-                } elseif (is_callable(self::$defaultDynamicHandler)) {
-                    return call_user_func(self::$defaultDynamicHandler, $feature, request()) === true;
+                    return false;
                 }
-
-                return false;
-            }
-        }
-
-        return false;
+            ),
+            default => false
+        };
     }
 
     public static function reset(): void
