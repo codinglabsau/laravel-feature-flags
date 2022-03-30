@@ -4,9 +4,7 @@ namespace Codinglabs\FeatureFlags;
 
 use Illuminate\Support\Facades\Blade;
 use Spatie\LaravelPackageTools\Package;
-use Codinglabs\FeatureFlags\Models\Feature;
 use Codinglabs\FeatureFlags\Facades\FeatureFlag;
-use Codinglabs\FeatureFlags\Commands\FeaturesCommand;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
 class FeatureFlagsServiceProvider extends PackageServiceProvider

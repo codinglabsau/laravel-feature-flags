@@ -1,97 +1,63 @@
 # Dynamic feature flags for laravel.
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/codinglabsau/laravel-feature-flags.svg?style=flat-square)](https://packagist.org/packages/codinglabsau/laravel-feature-flags)
-[![GitHub Tests Action Status](https://img.shields.io/github/workflow/status/codinglabsau/laravel-feature-flags/run-tests?label=tests)](https://github.com/codinglabsau/laravel-feature-flags/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/workflow/status/codinglabsau/laravel-feature-flags/Check%20&%20fix%20styling?label=code%20style)](https://github.com/codinglabsau/laravel-feature-flags/actions?query=workflow%3A"Check+%26+fix+styling"+branch%3Amain)
+[![Test](https://github.com/codinglabsau/laravel-feature-flags/actions/workflows/run-tests.yml/badge.svg)](https://github.com/codinglabsau/laravel-feature-flags/actions/workflows/run-tests.yml)
 [![Total Downloads](https://img.shields.io/packagist/dt/codinglabsau/laravel-feature-flags.svg?style=flat-square)](https://packagist.org/packages/codinglabsau/laravel-feature-flags)
 
-This package offers the ability to implement feature flags throughout your codebase allowing you to easily toggle parts of your application. Features are database driven which will allow you to easily configure them via a command or build a front end to manage their states. Here's an example of how they could be used:
-
-```php
-@feature('search-v2')
-    // new search goes here
-@else
-    // legacy search here
-@endfeature
-```
-And in your codebase:
-```php
-FeatureFlag::isEnabled('search-v2') // true
-```
+This package offers the ability to implement feature flags in your application which can be easily toggled on or off. You can also set a feature to a dynamic state where you can define custom rules around whether that feature is enabled or not.
 ___
 ## Installation
 
-You can install the package via composer:
+### Install With Composer:
 
 ```bash
 composer require codinglabsau/laravel-feature-flags
 ```
 
-You can publish and run the migrations with:
+### Database Migrations
 
 ```bash
-php artisan vendor:publish --tag="laravel-feature-flags-migrations"
+php artisan vendor:publish --tag="feature-flags-migrations"
 php artisan migrate
 ```
 
-You can publish the config file with:
+### Publish Configuration:
 
 ```bash
-php artisan vendor:publish --tag="laravel-feature-flags-config"
+php artisan vendor:publish --tag="feature-flags-config"
 ```
 
-This is the contents of the published config file:
+
+### Cache Store
+update your `.env`:
+```php
+FEATURES_CACHE_STORE=file
+```
+Note that under the hood this package uses the `rememberForever()` method for caching and that if you are using the `Memcached` driver, items that are stored "forever" may be removed when the cache reaches its size limit.
+
+### Use Your Own Model
+
+To use your own model, update the config and replace the existing reference with your own model:
 
 ```php
-return [
+// app/config/feature-flags.php
 
-    /*
-    |--------------------------------------------------------------------------
-    | Cache
-    |--------------------------------------------------------------------------
-    |
-    | Configure the cache store that will be used to cache the state of a
-    | feature. You can also configure a prefix for all keys in the cache.
-    */
+'feature_model' => \App\Models\Feature::class,
+```
 
-    'cache_store' => env('FEATURES_CACHE_STORE'),
-    'cache_prefix' => 'features',
+Make sure to also cast the state column to a feature state enum using the `FeatureStateCast`:
 
-    /*
-    |--------------------------------------------------------------------------
-    | Models
-    |--------------------------------------------------------------------------
-    |
-    | If you need to customise any models used then you can swap them out by
-    | replacing the default models defined here. 
-    */
+```php
+// app/Models/Feature.php
 
-    'feature_model' => \Codinglabs\FeatureFlags\Models\Feature::class,
+use Codinglabs\FeatureFlags\Casts\FeatureStateCast;
 
+protected $casts = [
+    'state' => FeatureStateCast::class
 ];
 ```
 
 ## Usage
-
-### Basic Setup
-
-###Migrations
-Make sure you have published the migrations as the `features` table is required:
-```bash
-php artisan vendor:publish --tag="laravel-feature-flags-migrations"
-php artisan migrate
-```
-
-### Configuring Cache
-Each features state will be cached on access which means it won't be calling the database every time a feature is being checked. You can configure the cache store by publishing the config:
-```
-php artisan vendor:publish --tag="laravel-feature-flags-config"
-```
-Then update your .env:
-```php
-FEATURES_CACHE_STORE=redis
-```
-Note that this package uses the `rememberForever()` method and that if you are using the `Memcached` driver, items that are stored "forever" may be removed when the cache reaches its size limit.
 
 Create a new feature in the database and give it a default state:
 ```php
@@ -100,7 +66,10 @@ Feature::create([
     'state' => Codinglabs\FeatureFlags\Enums\FeatureState::on()
 ]);
 ```
-There are three states a feature can be in:
+
+Its recommended that you seed the features to your database before a new deployment or as soon as possible after a deployment.
+
+A feature can be in one of three states:
 ```php
 use Codinglabs\FeatureFlags\Enums\FeatureState;
 
@@ -118,7 +87,8 @@ FeatureState::dynamic()
     // legacy search here
 @endfeature
 ```
-#### Code
+
+#### In Your Code
 ```php
 use Codinglabs\FeatureFlags\Facades\FeatureFlag;
 
@@ -127,6 +97,47 @@ if (FeatureFlag::isEnabled('search-v2')) {
 } else {
     // old code
 }
+```
+
+#### Sharing features with UI (Inertiajs example)
+```php
+// config/app.php
+
+'features' => [
+    [
+        'name' => 'search-v2',
+        'state' => \Codinglabs\FeatureFlags\Enums\FeatureState::dynamic()
+    ]
+],
+```
+
+```php
+// app/Middleware/HandleInertiaRequest.php
+
+Inertia::share([
+    'features' => function () {
+        return collect(config('app.features'))
+            ->filter(fn ($feature) => FeatureFlag::isEnabled($feature['name']))
+            ->pluck('name');
+    }
+]);
+```
+
+```javascript
+// app.js
+
+Vue.mixin({
+  methods: {
+    hasFeature: function(feature) {
+      return this.$page.features.includes(feature)
+    }
+  }
+})
+```
+```html
+<!-- SomeComponent.vue -->
+
+<div v-if="hasFeature('search-v2')">Some cool new feature</div>
 ```
 
 ### Updating A Features State
@@ -143,44 +154,52 @@ Alternatively you can set the state directly by passing a feature state enum:
 ```php
 FeatureFlag::updateFeatureState('search-v2', FeatureState::on())
 ```
-It is recommended that you only update a features state using the above methods as it will take care of updating the cache.
+It is recommended that you only update a features state using the above methods as it will take care of updating the cache and dispatching the feature updated event:
+
+```php
+\Codinglabs\FeatureFlags\Events\FeatureUpdatedEvent::class
+```
+An example use case of the feature updated event would be if you were caching the result of a dynamic handler and need to clear that cache when a feature is updated.
+
+___
+## Advanced Usage
 
 ### Dynamic Features
 
-When a features state is in the dynamic state it will look for a dynamic handler to determine whether that feature is enabled or not. A dynamic handler can be defined in the `boot()` method of your `AppServiceProvider`:
+A dynamic handler can be defined in the `boot()` method of your `AppServiceProvider`:
 ```php
 use Codinglabs\FeatureFlags\Facades\FeatureFlag;
 
 FeatureFlag::registerDynamicHandler('search-v2', function ($feature, $request) {
-    return $request->user() && $request->user()->canAccessFeature($feature);
+    return $request->user() && $request->user()->hasRole('Tester')
 });
 ```
- Each handler is given the feature name and the current request as arguments and must return a bool.
+Dynamic handlers will only be called when a feature is in the `dynamic` state. This will allow you to define custom rules around whether that feature is enabled like in the example above where the user can only access the feature if they have a tester role. 
 
-#### Default Handler For Dynamic Features
-You may also define a default dynamic handler which will be the catch-all dynamic handler for features that don't have an explicit handler defined for them:
+Each handler is provided with the features name and current request as arguments and must return a bool value.
+
+### Default Handler For Dynamic Features
+
+You may also define a default handler which will be the catch-all handler for features that don't have an explicit handler defined for them:
+
 ```php
 FeatureFlag::registerDefaultDynamicHandler(function ($feature, $request) {
     return $request->user() && $request->user()->hasRole('Tester');
 });
 ```
-When a feature is in the dynamic state it will look for an explicit handler for that feature first. If it can't find a handler and a default handler has been defined it will use that instead. If it can't find any handlers the feature will resolve to `off` by default.
 
-### Events
-#### Updated
-After a feature has been updated an event will be dispatched:
-```php
-\Codinglabs\FeatureFlags\Events\FeatureUpdatedEvent::class
-```
-This can be used to create a listener that could for example handle clearing any custom cache data created by dynamic handlers.
+An explicit handler defined using `registerDynamicHandler()` will take precedence over the default handler. If neither a default nor explicit handler has been defined then the feature will resolve to `off` by default.
 
 ### Handle Missing Features
+
 Features must exist in the database otherwise a `MissingFeatureException` will be thrown. This behaviour can be turned off by explicitly handling cases where a feature doesn't exist:
+
 ```php
 FeatureFlag::handleMissingFeaturesWith(function ($feature) {
     // log or report this somewhere...
 })
 ```
+
 If a handler for missing features has been defined then an exception will **not** be thrown and the feature will resolve to `off`.
 
 ## Testing
@@ -188,14 +207,6 @@ If a handler for missing features has been defined then an exception will **not*
 ```bash
 composer test
 ```
-
-## Changelog
-
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
-
-## Contributing
-
-Please see [CONTRIBUTING](https://github.com/spatie/.github/blob/main/CONTRIBUTING.md) for details.
 
 ## Security Vulnerabilities
 
