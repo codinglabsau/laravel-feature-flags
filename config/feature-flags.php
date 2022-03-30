@@ -1,5 +1,5 @@
 <?php
-// config for Codinglabs/FeatureFlags
+
 return [
 
     /*
