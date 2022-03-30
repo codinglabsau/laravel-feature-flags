@@ -74,15 +74,17 @@ class FeatureFlags
         return match (self::getState($feature)) {
             FeatureState::on() => true,
             FeatureState::off() => false,
-            FeatureState::dynamic() => call_user_func(function () use ($feature) {
-                if (array_key_exists($feature, self::$dynamicHandlers)) {
-                    return call_user_func(self::$dynamicHandlers[$feature], $feature, request()) === true;
-                } elseif (is_callable(self::$defaultDynamicHandler)) {
-                    return call_user_func(self::$defaultDynamicHandler, $feature, request()) === true;
-                }
+            FeatureState::dynamic() => call_user_func(
+                function () use ($feature) {
+                    if (array_key_exists($feature, self::$dynamicHandlers)) {
+                        return call_user_func(self::$dynamicHandlers[$feature], $feature, request()) === true;
+                    } elseif (is_callable(self::$defaultDynamicHandler)) {
+                        return call_user_func(self::$defaultDynamicHandler, $feature, request()) === true;
+                    }
 
-                return false;
-            }),
+                    return false;
+                }
+            ),
             default => false
         };
     }
