@@ -3,6 +3,7 @@
 namespace Codinglabs\FeatureFlags\Database\Factories;
 
 use Codinglabs\FeatureFlags\Models\Feature;
+use Codinglabs\FeatureFlags\Enums\FeatureState;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class FeatureFactory extends Factory
@@ -13,7 +14,11 @@ class FeatureFactory extends Factory
     {
         return [
             'name' => $this->faker->unique()->slug(2),
-            'state' => $this->faker->randomElement(['on', 'off', 'restricted'])
+            'state' => $this->faker->randomElement([
+                FeatureState::on()->value,
+                FeatureState::off()->value,
+                FeatureState::dynamic()->value,
+            ])
         ];
     }
 }
