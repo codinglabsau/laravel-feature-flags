@@ -128,7 +128,7 @@ it('can update a features state', function () {
     expect(cache()->store('array')->get('testing.some-feature'))->toBe(FeatureState::on()->value);
 });
 
-it('uses the default cache store when cache store has not been set', function() {
+it('uses the default cache store when cache store has not been set', function () {
     config(['cache.default' => 'file']);
 
     config(['feature-flags.cache_store' => env('FEATURES_CACHE_STORE', config('cache.default'))]);
