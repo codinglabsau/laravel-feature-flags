@@ -4,12 +4,14 @@
 [![Test](https://github.com/codinglabsau/laravel-feature-flags/actions/workflows/run-tests.yml/badge.svg)](https://github.com/codinglabsau/laravel-feature-flags/actions/workflows/run-tests.yml)
 [![Total Downloads](https://img.shields.io/packagist/dt/codinglabsau/laravel-feature-flags.svg?style=flat-square)](https://packagist.org/packages/codinglabsau/laravel-feature-flags)
 
-This package allows instant, zero-deployment toggling of application features.
+Laravel Feature Flags allows instant, zero-deployment toggling of application features.
 
-Individual features can be in one of three states:
+The state of each feature flag can be checked from anywhere in the application code (including via a `@feature('name')` blade directive) to determine whether the conditions you set have been met to enable the feature. 
+
+Each feature can be in one of three states:
 - On: enabled for everyone
 - Off: disabled for everyone
-- Dynamic: evaluated according to a custom or default callback
+- Dynamic: evaluated according to a feature-specific closure (with a fallback option)
 
 ___
 ## Installation
@@ -40,48 +42,21 @@ If you wish to change to a different cache driver, update your `.env`:
 FEATURES_CACHE_STORE=file
 ```
 
-### Use Your Own Model
-To use your own model, update the config and replace the existing reference with your own model:
-
-```php
-// app/config/feature-flags.php
-
-'feature_model' => \App\Models\Feature::class,
-```
-
-Make sure to also cast the state column to a feature state enum using the `FeatureStateCast`:
-
-```php
-// app/Models/Feature.php
-
-use Codinglabs\FeatureFlags\Casts\FeatureStateCast;
-
-protected $casts = [
-    'state' => FeatureStateCast::class
-];
-```
-
 ## Usage
-Create a new feature in the database and give it a default state:
+Create a new feature in the database and set the initial state:
 ```php
+use Codinglabs\FeatureFlags\Models\Feature;
+use Codinglabs\FeatureFlags\Enums\FeatureState;
+
 Feature::create([
     'name' => 'search-v2',
-    'state' => Codinglabs\FeatureFlags\Enums\FeatureState::on()
+    'state' => FeatureState::on()
 ]);
 ```
 
 Its recommended that you seed the features to your database before a new deployment or as soon as possible after a deployment.
 
-A feature can be in one of three states:
-```php
-use Codinglabs\FeatureFlags\Enums\FeatureState;
-
-FeatureState::on()
-FeatureState::off()
-FeatureState::dynamic()
-```
 ### Check If A Feature Is Enabled
-
 #### Blade View
 ```php
 @feature('search-v2')
@@ -103,7 +78,6 @@ if (FeatureFlag::isOn('search-v2')) {
 ```
 
 ### Updating A Features State
-
 To change a features state you can call the following methods:
 ```php
 use Codinglabs\FeatureFlags\Facades\FeatureFlag;
@@ -121,7 +95,7 @@ It is recommended that you only update a features state using the above methods 
 ```php
 \Codinglabs\FeatureFlags\Events\FeatureUpdatedEvent::class
 ```
-An example use case of the feature updated event would be if you were caching the result of a dynamic handler and need to clear that cache when a feature is updated.
+You should listen for the `FeatureUpdatedEvent` event if you have any downstream implications when a feature state is updated, such as invalidating any cached items that are referenced in dynamic handlers.
 
 ___
 ## Advanced Usage
@@ -131,12 +105,12 @@ A dynamic handler can be defined in the `boot()` method of your `AppServiceProvi
 use Codinglabs\FeatureFlags\Facades\FeatureFlag;
 
 FeatureFlag::registerDynamicHandler('search-v2', function ($feature, $request) {
-    return $request->user() && $request->user()->hasRole('Tester')
+    return $request->user() && $request->user()->hasRole('Tester');
 });
 ```
 Dynamic handlers will only be called when a feature is in the `dynamic` state. This will allow you to define custom rules around whether that feature is enabled like in the example above where the user can only access the feature if they have a tester role. 
 
-Each handler is provided with the features name and current request as arguments and must return a bool value.
+Each handler is provided with the features name and current request as arguments and must return a boolean value.
 
 ### Default Handler For Dynamic Features
 You may also define a default handler which will be the catch-all handler for features that don't have an explicit handler defined for them:
@@ -160,25 +134,38 @@ FeatureFlag::handleMissingFeaturesWith(function ($feature) {
 
 If a handler for missing features has been defined then an exception will **not** be thrown and the feature will resolve to `off`.
 
-### Sharing features with UI (Inertiajs example)
-```php
-// config/app.php
+### Using Your Own Model
+To use your own model, update the config and replace the existing reference with your own model:
 
-'features' => [
-    [
-        'name' => 'search-v2',
-        'state' => \Codinglabs\FeatureFlags\Enums\FeatureState::dynamic()
-    ]
-],
+```php
+// app/config/feature-flags.php
+
+'feature_model' => \App\Models\Feature::class,
 ```
 
+Make sure to also cast the state column to a feature state enum using the `FeatureStateCast`:
+
+```php
+// app/Models/Feature.php
+
+use Codinglabs\FeatureFlags\Casts\FeatureStateCast;
+
+protected $casts = [
+    'state' => FeatureStateCast::class
+];
+```
+
+### Sharing features with UI (Inertiajs example)
 ```php
 // app/Middleware/HandleInertiaRequest.php
 
+use Codinglabs\FeatureFlags\FeatureFlags;
+use Codinglabs\FeatureFlags\Models\Feature;
+
 Inertia::share([
     'features' => function () {
-        return collect(config('app.features'))
-            ->filter(fn ($feature) => FeatureFlag::isOn($feature['name']))
+        return Feature::all()
+            ->filter(fn ($feature) => FeatureFlags::isOn($feature['name']))
             ->pluck('name');
     }
 ]);
@@ -195,6 +182,7 @@ Vue.mixin({
   }
 })
 ```
+
 ```html
 <!-- SomeComponent.vue -->
 
