@@ -77,8 +77,8 @@ if (FeatureFlag::isOn('search-v2')) {
 }
 ```
 
-### Updating A Features State
-To change a features state you can call the following methods:
+### Updating Feature State
+To change the state of a feature you can call the following methods:
 ```php
 use Codinglabs\FeatureFlags\Facades\FeatureFlag;
 
