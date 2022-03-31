@@ -90,7 +90,7 @@ Alternatively you can set the state directly by passing a feature state enum:
 ```php
 FeatureFlag::updateFeatureState('search-v2', FeatureState::on())
 ```
-It is recommended that you only update a features state using the above methods as it will take care of updating the cache and dispatching the feature updated event:
+It is recommended that you only update a features state using the above methods as it will take care of flushing the cache and dispatching the feature updated event:
 
 ```php
 \Codinglabs\FeatureFlags\Events\FeatureUpdatedEvent::class
