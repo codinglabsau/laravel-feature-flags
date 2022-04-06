@@ -9,6 +9,8 @@ use Codinglabs\FeatureFlags\Enums\FeatureState;
  * @see \Codinglabs\FeatureFlags\FeatureFlags
  *
  * @method static bool isOn(string $feature)
+ * @method static bool isOff(string $feature)
+ * @method static FeatureState getState(string $feature)
  * @method static void updateFeatureState(string $feature, FeatureState $state)
  * @method static void turnOn(string $feature)
  * @method static void turnOff(string $feature)
