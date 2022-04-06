@@ -43,7 +43,7 @@ class FeatureFlags
         return null;
     }
 
-    private static function getState(string $feature): FeatureState
+    public static function getState(string $feature): FeatureState
     {
         $featureKey = self::getFeatureCacheKey($feature);
 
@@ -87,6 +87,11 @@ class FeatureFlags
             ),
             default => false
         };
+    }
+
+    public static function isOff(string $feature): bool
+    {
+        return ! self::isOn($feature);
     }
 
     public static function reset(): void

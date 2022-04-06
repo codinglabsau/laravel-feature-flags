@@ -77,6 +77,32 @@ if (FeatureFlag::isOn('search-v2')) {
 }
 ```
 
+### Check If A Feature Is Disabled
+#### Blade View
+```php
+@unlessfeature('search-v2')
+    // no new features for you
+@endfeature
+```
+
+#### In Your Code
+```php
+use Codinglabs\FeatureFlags\Facades\FeatureFlag;
+
+if (FeatureFlag::isOff('search-v2')) {
+    // no new features for you
+}
+```
+
+### Get The Underlying Current State
+If you want to know what the underlying `FeatureState` value is:
+```php
+use Codinglabs\FeatureFlags\Facades\FeatureFlag;
+
+// value from Codinglabs\FeatureFlags\Enums\FeatureState
+$featureState = FeatureFlag::getState('search-v2');
+```
+
 ### Updating Feature State
 To change the state of a feature you can call the following methods:
 ```php

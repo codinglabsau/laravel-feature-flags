@@ -18,10 +18,17 @@ afterEach(function () {
     FeatureFlag::reset();
 });
 
-it('throws an exception if calling isOn for a feature that does not exist', function () {
+it('throws an exception if calling isOn on a feature that does not exist', function () {
     $this->expectException(MissingFeatureException::class);
 
     FeatureFlag::isOn('some-feature');
+    expect(cache()->store('array')->get('testing.some-feature'))->toBeNull();
+});
+
+it('throws an exception if calling isOff on a feature that does not exist', function () {
+    $this->expectException(MissingFeatureException::class);
+
+    FeatureFlag::isOff('some-feature');
     expect(cache()->store('array')->get('testing.some-feature'))->toBeNull();
 });
 
@@ -37,6 +44,7 @@ it('handles a missing feature exception when a global handler has been defined',
     });
 
     expect(FeatureFlag::isOn('some-feature'))->toBeFalse();
+    expect(FeatureFlag::isOff('some-feature'))->toBeTrue();
     expect(cache()->store('array')->get('testing.some-feature'))->toBeNull();
 });
 
@@ -47,6 +55,7 @@ it('resolves isOn to false when the features state is "off"', function () {
     ]);
 
     expect(FeatureFlag::isOn('some-feature'))->toBeFalse();
+    expect(FeatureFlag::isOff('some-feature'))->toBeTrue();
     expect(cache()->store('array')->get('testing.some-feature'))->toBe(FeatureState::off()->value);
 });
 
@@ -57,6 +66,7 @@ it('resolves isOn to true when the features state is "on"', function () {
     ]);
 
     expect(FeatureFlag::isOn('some-feature'))->toBeTrue();
+    expect(FeatureFlag::isOff('some-feature'))->toBeFalse();
     expect(cache()->store('array')->get('testing.some-feature'))->toBe(FeatureState::on()->value);
 });
 
@@ -71,6 +81,7 @@ it('resolves isOn to true when feature state is "dynamic" and the closure return
     });
 
     expect(FeatureFlag::isOn('some-feature'))->toBeTrue();
+    expect(FeatureFlag::isOff('some-feature'))->toBeFalse();
     expect(cache()->store('array')->get('testing.some-feature'))->toBe(FeatureState::dynamic()->value);
 });
 
@@ -85,6 +96,7 @@ it('resolves isOn to false when feature state is "dynamic" and the closure retur
     });
 
     expect(FeatureFlag::isOn('some-feature'))->toBeFalse();
+    expect(FeatureFlag::isOff('some-feature'))->toBeTrue();
     expect(cache()->store('array')->get('testing.some-feature'))->toBe(FeatureState::dynamic()->value);
 });
 
@@ -99,6 +111,7 @@ it('uses the default dynamic closure if no feature specific closure has been def
     });
 
     expect(FeatureFlag::isOn('some-feature'))->toBeTrue();
+    expect(FeatureFlag::isOff('some-feature'))->toBeFalse();
     expect(cache()->store('array')->get('testing.some-feature'))->toBe(FeatureState::dynamic()->value);
 });
 
@@ -109,6 +122,26 @@ it('resolves isOn to false when feature state is "dynamic" and no dynamic closur
     ]);
 
     expect(FeatureFlag::isOn('some-feature'))->toBeFalse();
+    expect(FeatureFlag::isOff('some-feature'))->toBeTrue();
+});
+
+it('resolves the current state', function () {
+    Feature::factory()->create([
+        'name' => 'some-off-feature',
+        'state' => FeatureState::off()
+    ]);
+    Feature::factory()->create([
+        'name' => 'some-dynamic-feature',
+        'state' => FeatureState::dynamic()
+    ]);
+    Feature::factory()->create([
+        'name' => 'some-on-feature',
+        'state' => FeatureState::on()
+    ]);
+
+    expect(FeatureFlag::getState('some-off-feature'))->toBe(FeatureState::off());
+    expect(FeatureFlag::getState('some-dynamic-feature'))->toBe(FeatureState::dynamic());
+    expect(FeatureFlag::getState('some-on-feature'))->toBe(FeatureState::on());
 });
 
 it('can update a features state', function () {
@@ -125,6 +158,7 @@ it('can update a features state', function () {
 
     Event::assertDispatched(\Codinglabs\FeatureFlags\Events\FeatureUpdatedEvent::class);
     expect(FeatureFlag::isOn('some-feature'))->toBeTrue();
+    expect(FeatureFlag::isOff('some-feature'))->toBeFalse();
     expect(cache()->store('array')->get('testing.some-feature'))->toBe(FeatureState::on()->value);
 });
 
