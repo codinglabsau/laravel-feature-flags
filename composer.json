@@ -19,12 +19,12 @@
     ],
     "require": {
         "php": "^8.0",
-        "codinglabsau/php-styles": "dev-main",
         "illuminate/contracts": "^7.0|^8.0|^9.0",
         "spatie/enum": "^3.12",
         "spatie/laravel-package-tools": "^1.9.2"
     },
     "require-dev": {
+        "codinglabsau/php-styles": "dev-main",
         "nunomaduro/collision": "^6.0",
         "orchestra/testbench": "^7.0",
         "pestphp/pest": "^1.21",
@@ -49,7 +49,10 @@
         "test-coverage": "vendor/bin/pest --coverage"
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
     },
     "extra": {
         "laravel": {
