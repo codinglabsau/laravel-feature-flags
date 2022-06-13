@@ -58,6 +58,7 @@ Its recommended that you seed the features to your database before a new deploym
 
 ### Check If A Feature Is Enabled
 #### Blade View
+Use the `@feature` blade directive anywhere in your view files.
 ```php
 @feature('search-v2')
     // new search goes here
@@ -67,6 +68,7 @@ Its recommended that you seed the features to your database before a new deploym
 ```
 
 #### In Your Code
+Use the `FeatureFlag` facade to conveniently check the state of a feature in your app code.
 ```php
 use Codinglabs\FeatureFlags\Facades\FeatureFlag;
 
@@ -75,6 +77,19 @@ if (FeatureFlag::isOn('search-v2')) {
 } else {
     // old code
 }
+```
+
+#### Middleware
+Register `feature` as a route middleware in your HTTP Kernel to protect routes. A 404 response will be returned if the feature does not resolve to the on state.
+```php
+// app/Http/Kernel.php
+protected $routeMiddleware = [
+    // ... 
+    'feature' => \Codinglabs\FeatureFlags\Middleware\VerifyFeatureIsOn::class,
+];
+
+// routes/web.php
+Route::get('search-v2', \App\Http\Controllers\SearchV2Controller::class)->middleware('feature:search-v2');
 ```
 
 ### Check If A Feature Is Disabled
