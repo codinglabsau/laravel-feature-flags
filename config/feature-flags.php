@@ -4,6 +4,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Features
+    |--------------------------------------------------------------------------
+    |
+    | Declare features that are managed by the app with the Feature
+    | Flag package. The format is ['name' => FeatureState::on()].
+    */
+
+    'features' => [],
+
+    /*
+    |--------------------------------------------------------------------------
     | Cache
     |--------------------------------------------------------------------------
     |
@@ -20,8 +31,8 @@ return [
     | Models
     |--------------------------------------------------------------------------
     |
-    | If you need to customise any models used then you can swap them out by
-    | replacing the default models defined here.
+    | If you need to customise any models used then you can swap
+    | them out by replacing the default models defined here.
     */
 
     'feature_model' => \Codinglabs\FeatureFlags\Models\Feature::class,
