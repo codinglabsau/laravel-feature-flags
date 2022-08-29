@@ -15,6 +15,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Always On
+    |--------------------------------------------------------------------------
+    |
+    | Declare the environments where features will be synced to the on
+    | state. This is useful if features should always be on locally.
+    | Note this only impacts the behaviour of the sync action.
+    */
+
+    'always_on' => [],
+
+    /*
+    |--------------------------------------------------------------------------
     | Cache
     |--------------------------------------------------------------------------
     |

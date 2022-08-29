@@ -3,6 +3,7 @@
 namespace Codinglabs\FeatureFlags\Actions;
 
 use Codinglabs\FeatureFlags\Models\Feature;
+use Codinglabs\FeatureFlags\Enums\FeatureState;
 
 class SyncFeaturesAction
 {
@@ -11,7 +12,9 @@ class SyncFeaturesAction
         $features = collect(config('feature-flags.features'))
             ->map(fn ($state, $name) => [
                 'name' => $name,
-                'state' => $state
+                'state' => app()->environment(config('feature-flags.always_on', []))
+                    ? FeatureState::on()
+                    : $state
             ]);
 
         $featureModels = Feature::all();

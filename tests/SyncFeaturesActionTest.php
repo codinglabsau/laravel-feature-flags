@@ -110,3 +110,67 @@ it('removes features that have been removed', function () {
         'name' => 'some-other-feature',
     ]);
 });
+
+it('overrides the state when the always on config is used and the environment matches', function () {
+    app()->detectEnvironment(fn () => 'staging');
+
+    config([
+        'feature-flags.features' => [
+            'some-feature' => FeatureState::on(),
+            'some-other-feature' => FeatureState::off(),
+            'some-dynamic-feature' => FeatureState::dynamic(),
+        ],
+        'feature-flags.always_on' => ['staging'],
+    ]);
+
+    (new SyncFeaturesAction)->__invoke();
+
+    $this->assertDatabaseCount('features', 3);
+
+    $this->assertDatabaseHas('features', [
+        'name' => 'some-feature',
+        'state' => FeatureState::on(),
+    ]);
+
+    $this->assertDatabaseHas('features', [
+        'name' => 'some-other-feature',
+        'state' => FeatureState::on(),
+    ]);
+
+    $this->assertDatabaseHas('features', [
+        'name' => 'some-dynamic-feature',
+        'state' => FeatureState::on(),
+    ]);
+});
+
+it('does not override the state when the always on environment does not match', function () {
+    app()->detectEnvironment(fn () => 'production');
+
+    config([
+        'feature-flags.features' => [
+            'some-feature' => FeatureState::on(),
+            'some-other-feature' => FeatureState::off(),
+            'some-dynamic-feature' => FeatureState::dynamic(),
+        ],
+        'feature-flags.always_on' => ['local', 'staging'],
+    ]);
+
+    (new SyncFeaturesAction)->__invoke();
+
+    $this->assertDatabaseCount('features', 3);
+
+    $this->assertDatabaseHas('features', [
+        'name' => 'some-feature',
+        'state' => FeatureState::on(),
+    ]);
+
+    $this->assertDatabaseHas('features', [
+        'name' => 'some-other-feature',
+        'state' => FeatureState::off(),
+    ]);
+
+    $this->assertDatabaseHas('features', [
+        'name' => 'some-dynamic-feature',
+        'state' => FeatureState::dynamic(),
+    ]);
+});
