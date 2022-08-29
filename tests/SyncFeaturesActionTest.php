@@ -27,7 +27,7 @@ it('adds features that have no been synced', function () {
         ],
     ]);
 
-    (new SyncFeaturesAction)->__invoke();
+    (new SyncFeaturesAction())->__invoke();
 
     $this->assertDatabaseCount('features', 3);
 
@@ -65,7 +65,7 @@ it('skips features that have already been synced even if the state has changed',
         ],
     ]);
 
-    (new SyncFeaturesAction)->__invoke();
+    (new SyncFeaturesAction())->__invoke();
 
     $this->assertDatabaseCount('features', 2);
 
@@ -97,7 +97,7 @@ it('removes features that have been removed', function () {
         ],
     ]);
 
-    (new SyncFeaturesAction)->__invoke();
+    (new SyncFeaturesAction())->__invoke();
 
     $this->assertDatabaseCount('features', 1);
 
@@ -123,7 +123,7 @@ it('overrides the state when the always on config is used and the environment ma
         'feature-flags.always_on' => ['staging'],
     ]);
 
-    (new SyncFeaturesAction)->__invoke();
+    (new SyncFeaturesAction())->__invoke();
 
     $this->assertDatabaseCount('features', 3);
 
@@ -155,7 +155,7 @@ it('does not override the state when the always on environment does not match', 
         'feature-flags.always_on' => ['local', 'staging'],
     ]);
 
-    (new SyncFeaturesAction)->__invoke();
+    (new SyncFeaturesAction())->__invoke();
 
     $this->assertDatabaseCount('features', 3);
 
