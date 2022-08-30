@@ -2,7 +2,7 @@
 
 namespace Codinglabs\FeatureFlags\Actions;
 
-use Codinglabs\FeatureFlags\Models\Feature;
+use Illuminate\Database\Eloquent\Model;
 use Codinglabs\FeatureFlags\Enums\FeatureState;
 
 class SyncFeaturesAction
@@ -17,12 +17,12 @@ class SyncFeaturesAction
                     : $state
             ]);
 
-        $featureModels = Feature::all();
+        $featureModels = config('feature-flags.feature_model')::all();
 
         $featureModels->whereNotIn('name', $features->pluck('name'))
-            ->each(fn (Feature $feature) => $feature->delete());
+            ->each(fn (Model $feature) => $feature->delete());
 
         $features->whereNotIn('name', $featureModels->pluck('name'))
-            ->each(fn (array $feature) => Feature::create($feature));
+            ->each(fn (array $feature) => config('feature-flags.feature_model')::create($feature));
     }
 }
