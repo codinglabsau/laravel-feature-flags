@@ -1,10 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use Codinglabs\FeatureFlags\Models\Feature;
 use Codinglabs\FeatureFlags\Enums\FeatureState;
 use Codinglabs\FeatureFlags\Facades\FeatureFlag;
-use Codinglabs\FeatureFlags\Middleware\VerifyFeatureIsOn;
+use Codinglabs\FeatureFlags\Events\FeatureUpdatedEvent;
 use Codinglabs\FeatureFlags\Exceptions\MissingFeatureException;
 
 beforeEach(function () {
@@ -13,15 +12,20 @@ beforeEach(function () {
         'feature-flags.cache_prefix' => 'testing',
     ]);
 
-    Route::get('test-middleware', function () {
-        return 'ok';
-    })->middleware(VerifyFeatureIsOn::class . ':some-feature');
-
     cache()->store('array')->clear();
 });
 
 afterEach(function () {
     FeatureFlag::reset();
+});
+
+it('throws an exception if casting to a feature state that does not exist', function () {
+    $this->expectException(\InvalidArgumentException::class);
+
+    Feature::factory()->create([
+        'name' => 'some-feature',
+        'state' => 'foo',
+    ]);
 });
 
 it('throws an exception if calling isOn on a feature that does not exist', function () {
@@ -146,6 +150,60 @@ it('resolves the current state', function () {
         ->and(FeatureFlag::getState('some-on-feature'))->toBe(FeatureState::on());
 });
 
+it('can turn on a feature', function () {
+    Event::fake();
+
+    Feature::factory()->create([
+        'name' => 'some-feature',
+        'state' => FeatureState::off()
+    ]);
+
+    cache()->store('array')->set('testing.some-feature', 'off');
+
+    FeatureFlag::turnOn('some-feature');
+
+    Event::assertDispatched(FeatureUpdatedEvent::class);
+    expect(FeatureFlag::isOn('some-feature'))->toBeTrue()
+        ->and(FeatureFlag::isOff('some-feature'))->toBeFalse()
+        ->and(cache()->store('array')->get('testing.some-feature'))->toBe(FeatureState::on()->value);
+});
+
+it('can turn off a feature', function () {
+    Event::fake();
+
+    Feature::factory()->create([
+        'name' => 'some-feature',
+        'state' => FeatureState::on()
+    ]);
+
+    cache()->store('array')->set('testing.some-feature', 'on');
+
+    FeatureFlag::turnOff('some-feature');
+
+    Event::assertDispatched(FeatureUpdatedEvent::class);
+    expect(FeatureFlag::isOn('some-feature'))->toBeFalse()
+        ->and(FeatureFlag::isOff('some-feature'))->toBeTrue()
+        ->and(cache()->store('array')->get('testing.some-feature'))->toBe(FeatureState::off()->value);
+});
+
+it('can make a feature dynamic', function () {
+    Event::fake();
+
+    Feature::factory()->create([
+        'name' => 'some-feature',
+        'state' => FeatureState::on()
+    ]);
+
+    cache()->store('array')->set('testing.some-feature', 'on');
+
+    FeatureFlag::makeDynamic('some-feature');
+
+    Event::assertDispatched(FeatureUpdatedEvent::class);
+    expect(FeatureFlag::isOn('some-feature'))->toBeFalse()
+        ->and(FeatureFlag::isOff('some-feature'))->toBeTrue()
+        ->and(cache()->store('array')->get('testing.some-feature'))->toBe(FeatureState::dynamic()->value);
+});
+
 it('can update a features state', function () {
     Event::fake();
 
@@ -158,7 +216,7 @@ it('can update a features state', function () {
 
     FeatureFlag::updateFeatureState('some-feature', FeatureState::on());
 
-    Event::assertDispatched(\Codinglabs\FeatureFlags\Events\FeatureUpdatedEvent::class);
+    Event::assertDispatched(FeatureUpdatedEvent::class);
     expect(FeatureFlag::isOn('some-feature'))->toBeTrue()
         ->and(FeatureFlag::isOff('some-feature'))->toBeFalse()
         ->and(cache()->store('array')->get('testing.some-feature'))->toBe(FeatureState::on()->value);
@@ -170,55 +228,4 @@ it('uses the default cache store when cache store has not been set', function ()
     config(['feature-flags.cache_store' => env('FEATURES_CACHE_STORE', config('cache.default'))]);
 
     expect(config('feature-flags.cache_store'))->toBe('file');
-});
-
-it('returns a 500 status when a feature does not exist', function () {
-    $this->withoutExceptionHandling();
-
-    $this->expectException(MissingFeatureException::class);
-
-    $this->get('test-middleware')
-        ->assertStatus(500);
-});
-
-it('returns a 404 status when a feature is off', function () {
-    Feature::factory()->create([
-        'name' => 'some-feature',
-        'state' => FeatureState::off()
-    ]);
-
-    $this->get('test-middleware')
-        ->assertStatus(404);
-});
-
-it('returns a 404 status when a feature is dynamic', function () {
-    Feature::factory()->create([
-        'name' => 'some-feature',
-        'state' => FeatureState::dynamic()
-    ]);
-
-    $this->get('test-middleware')
-        ->assertStatus(404);
-});
-
-it('returns an ok status when a feature is dynamic and enabled', function () {
-    Feature::factory()->create([
-        'name' => 'some-feature',
-        'state' => FeatureState::dynamic()
-    ]);
-
-    FeatureFlag::registerDynamicHandler('some-feature', fn ($feature) => true);
-
-    $this->get('test-middleware')
-        ->assertOk();
-});
-
-it('returns an ok status when a feature is on', function () {
-    Feature::factory()->create([
-        'name' => 'some-feature',
-        'state' => FeatureState::on()
-    ]);
-
-    $this->get('test-middleware')
-        ->assertOk();
 });

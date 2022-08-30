@@ -8,12 +8,12 @@ use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 
 class FeatureStateCast implements CastsAttributes
 {
-    public function get($model, string $key, $value, array $attributes)
+    public function get($model, string $key, $value, array $attributes): FeatureState
     {
         return FeatureState::from($attributes['state']);
     }
 
-    public function set($model, string $key, $value, array $attributes)
+    public function set($model, string $key, $value, array $attributes): array
     {
         if (! $value instanceof FeatureState) {
             throw new InvalidArgumentException('The given value is not an instance of FeatureState.');
