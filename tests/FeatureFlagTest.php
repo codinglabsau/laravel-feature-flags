@@ -19,6 +19,15 @@ afterEach(function () {
     FeatureFlag::reset();
 });
 
+it('throws an exception if casting to a feature state that does not exist', function () {
+    $this->expectException(\InvalidArgumentException::class);
+
+    Feature::factory()->create([
+        'name' => 'some-feature',
+        'state' => 'foo',
+    ]);
+});
+
 it('throws an exception if calling isOn on a feature that does not exist', function () {
     $this->expectException(MissingFeatureException::class);
 
@@ -139,6 +148,60 @@ it('resolves the current state', function () {
     expect(FeatureFlag::getState('some-off-feature'))->toBe(FeatureState::off())
         ->and(FeatureFlag::getState('some-dynamic-feature'))->toBe(FeatureState::dynamic())
         ->and(FeatureFlag::getState('some-on-feature'))->toBe(FeatureState::on());
+});
+
+it('can turn on a feature', function () {
+    Event::fake();
+
+    Feature::factory()->create([
+        'name' => 'some-feature',
+        'state' => FeatureState::off()
+    ]);
+
+    cache()->store('array')->set('testing.some-feature', 'off');
+
+    FeatureFlag::turnOn('some-feature');
+
+    Event::assertDispatched(FeatureUpdatedEvent::class);
+    expect(FeatureFlag::isOn('some-feature'))->toBeTrue()
+        ->and(FeatureFlag::isOff('some-feature'))->toBeFalse()
+        ->and(cache()->store('array')->get('testing.some-feature'))->toBe(FeatureState::on()->value);
+});
+
+it('can turn off a feature', function () {
+    Event::fake();
+
+    Feature::factory()->create([
+        'name' => 'some-feature',
+        'state' => FeatureState::on()
+    ]);
+
+    cache()->store('array')->set('testing.some-feature', 'on');
+
+    FeatureFlag::turnOff('some-feature');
+
+    Event::assertDispatched(FeatureUpdatedEvent::class);
+    expect(FeatureFlag::isOn('some-feature'))->toBeFalse()
+        ->and(FeatureFlag::isOff('some-feature'))->toBeTrue()
+        ->and(cache()->store('array')->get('testing.some-feature'))->toBe(FeatureState::off()->value);
+});
+
+it('can make a feature dynamic', function () {
+    Event::fake();
+
+    Feature::factory()->create([
+        'name' => 'some-feature',
+        'state' => FeatureState::on()
+    ]);
+
+    cache()->store('array')->set('testing.some-feature', 'on');
+
+    FeatureFlag::makeDynamic('some-feature');
+
+    Event::assertDispatched(FeatureUpdatedEvent::class);
+    expect(FeatureFlag::isOn('some-feature'))->toBeFalse()
+        ->and(FeatureFlag::isOff('some-feature'))->toBeTrue()
+        ->and(cache()->store('array')->get('testing.some-feature'))->toBe(FeatureState::dynamic()->value);
 });
 
 it('can update a features state', function () {
