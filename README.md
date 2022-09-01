@@ -1,8 +1,5 @@
 # Dynamic Feature Flags for Laravel
 
-> **Warning**
-> This package is still in development and not ready for production use.
-
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/codinglabsau/laravel-feature-flags.svg?style=flat-square)](https://packagist.org/packages/codinglabsau/laravel-feature-flags)
 [![Test](https://github.com/codinglabsau/laravel-feature-flags/actions/workflows/run-tests.yml/badge.svg)](https://github.com/codinglabsau/laravel-feature-flags/actions/workflows/run-tests.yml)
 [![Total Downloads](https://img.shields.io/packagist/dt/codinglabsau/laravel-feature-flags.svg?style=flat-square)](https://packagist.org/packages/codinglabsau/laravel-feature-flags)
