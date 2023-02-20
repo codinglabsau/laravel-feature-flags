@@ -2,13 +2,24 @@
 
 namespace Codinglabs\FeatureFlags\Enums;
 
-use Spatie\Enum\Enum;
-
-/**
- * @method static self on()
- * @method static self off()
- * @method static self dynamic()
- */
-class FeatureState extends Enum
+enum FeatureState: string
 {
+    case ON = 'on';
+    case OFF = 'off';
+    case DYNAMIC = 'dynamic';
+
+    public static function on(): self
+    {
+        return self::ON;
+    }
+
+    public static function off(): self
+    {
+        return self::OFF;
+    }
+
+    public static function dynamic(): self
+    {
+        return self::DYNAMIC;
+    }
 }
