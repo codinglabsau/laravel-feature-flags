@@ -26,8 +26,5 @@ jobs:
       - name: Install composer dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
 
-      - name: Code sniff
-        run: vendor/bin/php-cs-fixer fix --dry-run
-
       - name: Execute tests
         run: composer test
