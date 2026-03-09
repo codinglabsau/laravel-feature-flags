@@ -5,11 +5,11 @@ namespace Codinglabs\FeatureFlags;
 use Illuminate\Support\Facades\Blade;
 use Spatie\LaravelPackageTools\Package;
 use Codinglabs\FeatureFlags\Facades\FeatureFlag;
-use Codinglabs\FeatureFlags\Commands\TurnOnFeatureCommand;
-use Codinglabs\FeatureFlags\Commands\TurnOffFeatureCommand;
-use Codinglabs\FeatureFlags\Commands\ManageFeaturesCommand;
-use Codinglabs\FeatureFlags\Commands\SetFeatureStateCommand;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
+use Codinglabs\FeatureFlags\Commands\TurnOnFeatureCommand;
+use Codinglabs\FeatureFlags\Commands\ManageFeaturesCommand;
+use Codinglabs\FeatureFlags\Commands\TurnOffFeatureCommand;
+use Codinglabs\FeatureFlags\Commands\SetFeatureStateCommand;
 
 class FeatureFlagsServiceProvider extends PackageServiceProvider
 {

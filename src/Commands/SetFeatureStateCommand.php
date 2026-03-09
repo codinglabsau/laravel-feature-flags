@@ -21,7 +21,7 @@ class SetFeatureStateCommand extends Command
         $validStates = array_map(fn (FeatureState $s) => $s->value, FeatureState::cases());
 
         if (! in_array($state, $validStates)) {
-            $this->error("Invalid state '{$state}'. Valid states: ".implode(', ', $validStates));
+            $this->error("Invalid state '{$state}'. Valid states: " . implode(', ', $validStates));
 
             return self::FAILURE;
         }
