@@ -4,6 +4,7 @@ use Codinglabs\FeatureFlags\Models\Feature;
 use Codinglabs\FeatureFlags\Enums\FeatureState;
 use Codinglabs\FeatureFlags\Facades\FeatureFlag;
 use Codinglabs\FeatureFlags\Actions\SyncFeaturesAction;
+use Codinglabs\FeatureFlags\Tests\Fixtures\TestScope;
 
 beforeEach(function () {
     config([
@@ -140,6 +141,112 @@ it('overrides the state when the always on config is used and the environment ma
     $this->assertDatabaseHas('features', [
         'name' => 'some-dynamic-feature',
         'state' => FeatureState::on(),
+    ]);
+});
+
+it('syncs scope as null when using simple config format', function () {
+    config([
+        'feature-flags.features' => [
+            'some-feature' => FeatureState::on(),
+        ],
+    ]);
+
+    (new SyncFeaturesAction())->__invoke();
+
+    $this->assertDatabaseHas('features', [
+        'name' => 'some-feature',
+        'state' => FeatureState::on(),
+        'scope' => null,
+    ]);
+});
+
+it('syncs scope when using rich config format', function () {
+    config([
+        'feature-flags.features' => [
+            'some-feature' => [
+                'state' => FeatureState::off(),
+                'scope' => 'development',
+            ],
+        ],
+    ]);
+
+    (new SyncFeaturesAction())->__invoke();
+
+    $this->assertDatabaseHas('features', [
+        'name' => 'some-feature',
+        'state' => FeatureState::off(),
+        'scope' => 'development',
+    ]);
+});
+
+it('supports mixed simple and rich config formats', function () {
+    config([
+        'feature-flags.features' => [
+            'simple-feature' => FeatureState::on(),
+            'rich-feature' => [
+                'state' => FeatureState::off(),
+                'scope' => 'release',
+            ],
+        ],
+    ]);
+
+    (new SyncFeaturesAction())->__invoke();
+
+    $this->assertDatabaseCount('features', 2);
+
+    $this->assertDatabaseHas('features', [
+        'name' => 'simple-feature',
+        'scope' => null,
+    ]);
+
+    $this->assertDatabaseHas('features', [
+        'name' => 'rich-feature',
+        'scope' => 'release',
+    ]);
+});
+
+it('updates scope on re-sync when config changes', function () {
+    Feature::factory()->create([
+        'name' => 'some-feature',
+        'state' => FeatureState::off(),
+        'scope' => 'development',
+    ]);
+
+    config([
+        'feature-flags.features' => [
+            'some-feature' => [
+                'state' => FeatureState::on(),
+                'scope' => 'release',
+            ],
+        ],
+    ]);
+
+    (new SyncFeaturesAction())->__invoke();
+
+    $this->assertDatabaseHas('features', [
+        'name' => 'some-feature',
+        'state' => FeatureState::off(), // state should NOT change
+        'scope' => 'release', // scope SHOULD change
+    ]);
+});
+
+it('resolves backed enum scope values', function () {
+    $scope = TestScope::Development;
+
+    config([
+        'feature-flags.features' => [
+            'some-feature' => [
+                'state' => FeatureState::off(),
+                'scope' => $scope,
+            ],
+        ],
+    ]);
+
+    (new SyncFeaturesAction())->__invoke();
+
+    $this->assertDatabaseHas('features', [
+        'name' => 'some-feature',
+        'scope' => 'development',
     ]);
 });
 

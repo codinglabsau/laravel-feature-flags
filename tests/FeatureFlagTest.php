@@ -222,6 +222,35 @@ it('can update a features state', function () {
         ->and(cache()->store('array')->get('testing.some-feature'))->toBe(FeatureState::on()->value);
 });
 
+it('returns the scope for a feature', function () {
+    Feature::factory()->create([
+        'name' => 'some-feature',
+        'state' => FeatureState::off(),
+        'scope' => 'development',
+    ]);
+
+    expect(FeatureFlag::getScope('some-feature'))->toBe('development');
+});
+
+it('returns null scope when feature has no scope', function () {
+    Feature::factory()->create([
+        'name' => 'some-feature',
+        'state' => FeatureState::off(),
+        'scope' => null,
+    ]);
+
+    expect(FeatureFlag::getScope('some-feature'))->toBeNull();
+});
+
+it('filters features by scope using model scope', function () {
+    Feature::factory()->create(['name' => 'dev-feature', 'state' => FeatureState::off(), 'scope' => 'development']);
+    Feature::factory()->create(['name' => 'release-feature', 'state' => FeatureState::off(), 'scope' => 'release']);
+    Feature::factory()->create(['name' => 'no-scope-feature', 'state' => FeatureState::off(), 'scope' => null]);
+
+    expect(Feature::scope('development')->pluck('name')->all())->toBe(['dev-feature'])
+        ->and(Feature::scope('release')->pluck('name')->all())->toBe(['release-feature']);
+});
+
 it('uses the default cache store when cache store has not been set', function () {
     config(['cache.default' => 'file']);
 

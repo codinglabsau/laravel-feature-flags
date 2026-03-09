@@ -126,6 +126,15 @@ class FeatureFlags
         self::updateFeatureState($feature, FeatureState::off());
     }
 
+    public static function getScope(string $feature): ?string
+    {
+        if ($featureModel = self::getFeatureModel($feature)) {
+            return $featureModel->scope;
+        }
+
+        return null;
+    }
+
     public static function updateFeatureState(string $feature, FeatureState $state): void
     {
         if ($featureModel = self::getFeatureModel($feature)) {
