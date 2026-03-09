@@ -5,6 +5,10 @@ namespace Codinglabs\FeatureFlags;
 use Illuminate\Support\Facades\Blade;
 use Spatie\LaravelPackageTools\Package;
 use Codinglabs\FeatureFlags\Facades\FeatureFlag;
+use Codinglabs\FeatureFlags\Commands\TurnOnFeatureCommand;
+use Codinglabs\FeatureFlags\Commands\TurnOffFeatureCommand;
+use Codinglabs\FeatureFlags\Commands\ManageFeaturesCommand;
+use Codinglabs\FeatureFlags\Commands\SetFeatureStateCommand;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
 class FeatureFlagsServiceProvider extends PackageServiceProvider
@@ -14,7 +18,13 @@ class FeatureFlagsServiceProvider extends PackageServiceProvider
         $package
             ->name('laravel-feature-flags')
             ->hasConfigFile()
-            ->hasMigration('create_features_table');
+            ->hasMigration('create_features_table')
+            ->hasCommands([
+                ManageFeaturesCommand::class,
+                TurnOnFeatureCommand::class,
+                TurnOffFeatureCommand::class,
+                SetFeatureStateCommand::class,
+            ]);
     }
 
     public function packageRegistered()
