@@ -172,40 +172,37 @@ FeatureFlag::registerDefaultDynamicHandler(function ($feature, $request) {
 An explicit handler defined using `registerDynamicHandler()` will take precedence over the default handler. If neither a default nor explicit handler has been defined then the feature will resolve to `off` by default.
 
 ### Feature Scopes
-You can assign a scope to categorise features, for example to separate flags still in development from those ready for admin visibility:
+Features can optionally be scoped. Unscoped features (`null` scope) are your standard flags — the ones you'd typically expose in an admin panel for toggling. Scoped features are hidden away until they're ready.
+
+This is useful when you want to ship work-in-progress behind a flag without it appearing alongside production flags that admins manage:
 
 ```php
 // config/feature-flags.php
 'features' => [
-    // Simple format (no scope)
+    // Unscoped — visible in admin UI, toggleable by admins
     'search-v2' => FeatureState::on(),
+    'dark-mode' => FeatureState::off(),
 
-    // Rich format with scope
-    'new-dashboard' => [
+    // Scoped — hidden from admin UI, still in development
+    'new-checkout-flow' => [
         'state' => FeatureState::off(),
-        'scope' => 'development',
-    ],
-    'redesigned-checkout' => [
-        'state' => FeatureState::off(),
-        'scope' => 'release',
+        'scope' => 'beta',
     ],
 ],
 ```
 
-Scope values are free-form strings — define whatever values make sense for your project. Scope syncs from config on every deploy, so graduating a flag from `development` to `release` is just a config change.
+Scope values are free-form strings — use whatever makes sense for your workflow (`beta`, `in-development`, `ticket-124-fix`, etc.). Scope syncs from config on every deploy, so promoting a feature is just a config change (remove the scope or change it).
 
-Query features by scope using the model scope:
+In your admin UI, show only unscoped features:
 ```php
-// Only show "release" flags in your admin UI
-Feature::scope('release')->get();
-
-// Get all features without a scope
 Feature::whereNull('scope')->get();
 ```
 
-You can also check a feature's scope via the facade:
+Or include features from specific scopes, for example to let beta testers access beta-scoped flags:
 ```php
-FeatureFlag::getScope('new-dashboard'); // 'development'
+Feature::where(function ($query) {
+    $query->whereNull('scope')->orWhere('scope', 'beta');
+})->get();
 ```
 
 ### Handle Missing Features
