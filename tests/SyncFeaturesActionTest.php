@@ -3,8 +3,8 @@
 use Codinglabs\FeatureFlags\Models\Feature;
 use Codinglabs\FeatureFlags\Enums\FeatureState;
 use Codinglabs\FeatureFlags\Facades\FeatureFlag;
-use Codinglabs\FeatureFlags\Actions\SyncFeaturesAction;
 use Codinglabs\FeatureFlags\Tests\Fixtures\TestScope;
+use Codinglabs\FeatureFlags\Actions\SyncFeaturesAction;
 
 beforeEach(function () {
     config([
