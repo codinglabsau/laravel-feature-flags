@@ -42,6 +42,13 @@ If you wish to change to a different cache driver, update your `.env`:
 FEATURES_CACHE_STORE=file
 ```
 
+### Upgrading
+After upgrading the package, publish and run any new migrations:
+```bash
+php artisan vendor:publish --tag="feature-flags-migrations"
+php artisan migrate
+```
+
 ## Usage
 Create a new feature in the database and set the initial state:
 ```php
@@ -163,6 +170,43 @@ FeatureFlag::registerDefaultDynamicHandler(function ($feature, $request) {
 ```
 
 An explicit handler defined using `registerDynamicHandler()` will take precedence over the default handler. If neither a default nor explicit handler has been defined then the feature will resolve to `off` by default.
+
+### Feature Scopes
+You can assign a scope to categorise features, for example to separate flags still in development from those ready for admin visibility:
+
+```php
+// config/feature-flags.php
+'features' => [
+    // Simple format (no scope)
+    'search-v2' => FeatureState::on(),
+
+    // Rich format with scope
+    'new-dashboard' => [
+        'state' => FeatureState::off(),
+        'scope' => 'development',
+    ],
+    'redesigned-checkout' => [
+        'state' => FeatureState::off(),
+        'scope' => 'release',
+    ],
+],
+```
+
+Scope values are free-form strings — define whatever values make sense for your project. Scope syncs from config on every deploy, so graduating a flag from `development` to `release` is just a config change.
+
+Query features by scope using the model scope:
+```php
+// Only show "release" flags in your admin UI
+Feature::scope('release')->get();
+
+// Get all features without a scope
+Feature::whereNull('scope')->get();
+```
+
+You can also check a feature's scope via the facade:
+```php
+FeatureFlag::getScope('new-dashboard'); // 'development'
+```
 
 ### Handle Missing Features
 Features must exist in the database otherwise a `MissingFeatureException` will be thrown. This behaviour can be turned off by explicitly handling cases where a feature doesn't exist:
