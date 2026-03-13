@@ -27,8 +27,18 @@ class SyncFeaturesAction
                 return;
             }
 
+            $updates = [];
+
             if ($existing->scope !== $feature['scope']) {
-                $existing->update(['scope' => $feature['scope']]);
+                $updates['scope'] = $feature['scope'];
+            }
+
+            if ($existing->description !== $feature['description']) {
+                $updates['description'] = $feature['description'];
+            }
+
+            if ($updates) {
+                $existing->update($updates);
             }
         });
     }
@@ -40,6 +50,7 @@ class SyncFeaturesAction
                 'name' => $name,
                 'state' => $alwaysOn ? FeatureState::on() : $config,
                 'scope' => null,
+                'description' => null,
             ];
         }
 
@@ -53,6 +64,7 @@ class SyncFeaturesAction
             'name' => $name,
             'state' => $alwaysOn ? FeatureState::on() : $config['state'],
             'scope' => $scope,
+            'description' => $config['description'] ?? null,
         ];
     }
 }

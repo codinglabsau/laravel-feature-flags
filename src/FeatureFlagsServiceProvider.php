@@ -14,8 +14,14 @@ class FeatureFlagsServiceProvider extends PackageServiceProvider
         $package
             ->name('laravel-feature-flags')
             ->hasConfigFile()
-            ->hasMigration('create_features_table')
-            ->hasMigration('add_scope_to_features_table');
+            ->hasMigration('create_features_table');
+    }
+
+    public function boot()
+    {
+        $this->package->runsMigrations = false;
+
+        return parent::boot();
     }
 
     public function packageRegistered()

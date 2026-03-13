@@ -19,6 +19,8 @@ use Codinglabs\FeatureFlags\Enums\FeatureState;
  * @method static void registerDynamicHandler(string $feature, \Closure $closure)
  * @method static void registerDefaultDynamicHandler(\Closure $closure)
  * @method static void handleMissingFeatureWith(\Closure $closure)
+ * @method static ?string getScope(string $feature)
+ * @method static ?string getDescription(string $feature)
  */
 class FeatureFlag extends Facade
 {

@@ -251,6 +251,26 @@ it('filters features by scope using model scope', function () {
         ->and(Feature::scope('release')->pluck('name')->all())->toBe(['release-feature']);
 });
 
+it('returns the description for a feature', function () {
+    Feature::factory()->create([
+        'name' => 'some-feature',
+        'state' => FeatureState::off(),
+        'description' => 'New search powered by Meilisearch',
+    ]);
+
+    expect(FeatureFlag::getDescription('some-feature'))->toBe('New search powered by Meilisearch');
+});
+
+it('returns null description when feature has no description', function () {
+    Feature::factory()->create([
+        'name' => 'some-feature',
+        'state' => FeatureState::off(),
+        'description' => null,
+    ]);
+
+    expect(FeatureFlag::getDescription('some-feature'))->toBeNull();
+});
+
 it('uses the default cache store when cache store has not been set', function () {
     config(['cache.default' => 'file']);
 

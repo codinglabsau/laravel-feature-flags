@@ -43,11 +43,7 @@ FEATURES_CACHE_STORE=file
 ```
 
 ### Upgrading
-After upgrading the package, publish and run any new migrations:
-```bash
-php artisan vendor:publish --tag="feature-flags-migrations"
-php artisan migrate
-```
+See the [upgrade guide](UPGRADING.md) for instructions on upgrading between major versions.
 
 ## Usage
 Create a new feature in the database and set the initial state:
@@ -172,38 +168,40 @@ FeatureFlag::registerDefaultDynamicHandler(function ($feature, $request) {
 An explicit handler defined using `registerDynamicHandler()` will take precedence over the default handler. If neither a default nor explicit handler has been defined then the feature will resolve to `off` by default.
 
 ### Feature Scopes
-Features can optionally be scoped. Unscoped features (`null` scope) are your standard flags — the ones you'd typically expose in an admin panel for toggling. Scoped features are hidden away until they're ready.
+Features can be assigned a scope to categorise them. A feature's scope has no effect on its state — `isOn()`, `isOff()`, middleware, and Blade directives all behave the same regardless of scope. Scope becomes useful when you build a UI around your feature flags (an admin panel, a tenant dashboard, a feature group system) and need to control which flags appear where.
 
-This is useful when you want to ship work-in-progress behind a flag without it appearing alongside production flags that admins manage:
+Use the rich config format to assign a scope and description:
 
 ```php
 // config/feature-flags.php
 'features' => [
-    // Unscoped — visible in admin UI, toggleable by admins
+    // No scope — standard flags
     'search-v2' => FeatureState::on(),
     'dark-mode' => FeatureState::off(),
 
-    // Scoped — hidden from admin UI, still in development
+    // Scoped — categorised for filtering in your UI
     'new-checkout-flow' => [
         'state' => FeatureState::off(),
-        'scope' => 'beta',
+        'scope' => 'dev',
+        'description' => 'Redesigned single-page checkout flow',
     ],
 ],
 ```
 
-Scope values are free-form strings — use whatever makes sense for your workflow (`beta`, `in-development`, `ticket-124-fix`, etc.). Scope syncs from config on every deploy, so promoting a feature is just a config change (remove the scope or change it).
+Scope values are free-form strings — use whatever makes sense for your workflow (`dev`, `beta`, `ticket-124`, etc.). Both scope and description sync from config on every deploy, so changing a feature's scope is just a config change.
 
-In your admin UI, show only unscoped features:
+If you've built a UI around your feature toggles, use scope to filter which flags are shown:
 ```php
+// Only unscoped features — e.g. a production admin panel
 Feature::whereNull('scope')->get();
-```
 
-Or include features from specific scopes, for example to let beta testers access beta-scoped flags:
-```php
+// Unscoped + beta — e.g. a beta testers dashboard
 Feature::where(function ($query) {
     $query->whereNull('scope')->orWhere('scope', 'beta');
 })->get();
 ```
+
+In a multi-tenant setup, scope lets you control which flags appear on each tenant's dashboard — for example, keeping `dev`-scoped flags out of tenant-facing UIs entirely while still having them active in code.
 
 ### Handle Missing Features
 Features must exist in the database otherwise a `MissingFeatureException` will be thrown. This behaviour can be turned off by explicitly handling cases where a feature doesn't exist:

@@ -250,6 +250,64 @@ it('resolves backed enum scope values', function () {
     ]);
 });
 
+it('syncs description when using rich config format', function () {
+    config([
+        'feature-flags.features' => [
+            'some-feature' => [
+                'state' => FeatureState::off(),
+                'description' => 'New search powered by Meilisearch',
+            ],
+        ],
+    ]);
+
+    (new SyncFeaturesAction())->__invoke();
+
+    $this->assertDatabaseHas('features', [
+        'name' => 'some-feature',
+        'description' => 'New search powered by Meilisearch',
+    ]);
+});
+
+it('syncs description as null when using simple config format', function () {
+    config([
+        'feature-flags.features' => [
+            'some-feature' => FeatureState::on(),
+        ],
+    ]);
+
+    (new SyncFeaturesAction())->__invoke();
+
+    $this->assertDatabaseHas('features', [
+        'name' => 'some-feature',
+        'description' => null,
+    ]);
+});
+
+it('updates description on re-sync when config changes', function () {
+    Feature::factory()->create([
+        'name' => 'some-feature',
+        'state' => FeatureState::off(),
+        'description' => 'Old description',
+    ]);
+
+    config([
+        'feature-flags.features' => [
+            'some-feature' => [
+                'state' => FeatureState::on(),
+                'description' => 'Updated description',
+            ],
+        ],
+    ]);
+
+    (new SyncFeaturesAction())->__invoke();
+
+    $this->assertDatabaseHas('features', [
+        'name' => 'some-feature',
+        'state' => FeatureState::off(), // state should NOT change
+        'description' => 'Updated description', // description SHOULD change
+    ]);
+});
+
 it('does not override the state when the always on environment does not match', function () {
     app()->detectEnvironment(fn () => 'production');
 
