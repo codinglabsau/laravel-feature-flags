@@ -141,6 +141,29 @@ It is recommended that you only update a features state using the above methods 
 ```
 You should listen for the `FeatureUpdatedEvent` event if you have any downstream implications when a feature state is updated, such as invalidating any cached items that are referenced in dynamic handlers.
 
+### Artisan Commands
+Manage feature flags directly from the command line — useful when SSHed into a server.
+
+#### Interactive Management
+```bash
+php artisan feature:manage
+```
+Displays a table of all features and their states, then lets you select a feature, choose a new state, and confirm before saving. Loops so you can make multiple changes in one session.
+
+#### Scriptable Commands
+```bash
+# Turn a feature on
+php artisan feature:on search-v2
+
+# Turn a feature off
+php artisan feature:off search-v2
+
+# Set a specific state (on, off, dynamic)
+php artisan feature:state search-v2 dynamic
+```
+
+These commands handle cache invalidation automatically and return appropriate exit codes for use in scripts.
+
 ___
 ## Advanced Usage
 ### Dynamic Features
