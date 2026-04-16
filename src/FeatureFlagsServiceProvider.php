@@ -17,13 +17,6 @@ class FeatureFlagsServiceProvider extends PackageServiceProvider
             ->hasMigration('create_features_table');
     }
 
-    public function boot()
-    {
-        $this->package->runsMigrations = false;
-
-        return parent::boot();
-    }
-
     public function packageRegistered()
     {
         $this->app->singleton('features', function () {

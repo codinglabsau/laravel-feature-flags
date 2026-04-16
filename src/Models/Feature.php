@@ -15,9 +15,4 @@ class Feature extends Model
     protected $casts = [
         'state' => FeatureStateCast::class
     ];
-
-    public function scopeScope($query, string $scope)
-    {
-        return $query->where('scope', $scope);
-    }
 }

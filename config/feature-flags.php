@@ -9,23 +9,6 @@ return [
     |
     | Declare features that are managed by the app with the Feature
     | Flag package. The format is ['name' => FeatureState::on()].
-    |
-    | You can also use a rich format to assign a scope and description:
-    | 'name' => [
-    |     'state' => FeatureState::off(),
-    |     'scope' => 'development',
-    |     'description' => 'New search powered by Meilisearch',
-    | ]
-    |
-    | Scope is a free-form string for categorising flags. Apps can
-    | use it to filter which flags are shown in admin UIs, e.g.
-    | Feature::scope('release')->get().
-    |
-    | Description is a human-readable explanation of what the feature
-    | does, useful for admin UIs where non-developers manage flags.
-    |
-    | Both scope and description sync from config on every deploy,
-    | unlike state which is only set on creation.
     */
 
     'features' => [],
