@@ -23,7 +23,7 @@
         "spatie/laravel-package-tools": "^1.14.1"
     },
     "require-dev": {
-        "codinglabsau/php-styles": "dev-main",
+        "laravel/pint": "^1.25",
         "orchestra/testbench": "^9.0|^10.0",
         "pestphp/pest": "^3.0",
         "pestphp/pest-plugin-laravel": "^3.0"

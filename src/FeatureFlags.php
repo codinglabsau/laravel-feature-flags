@@ -13,7 +13,9 @@ use Codinglabs\FeatureFlags\Exceptions\MissingFeatureException;
 class FeatureFlags
 {
     private static ?Closure $defaultDynamicHandler = null;
+
     private static ?Closure $handleMissingFeatureClosure = null;
+
     public static array $dynamicHandlers = [];
 
     private static function cache(): Repository

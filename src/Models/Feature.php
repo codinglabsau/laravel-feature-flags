@@ -13,6 +13,6 @@ class Feature extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'state' => FeatureStateCast::class
+        'state' => FeatureStateCast::class,
     ];
 }

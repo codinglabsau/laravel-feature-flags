@@ -20,7 +20,7 @@ class FeatureStateCast implements CastsAttributes
         }
 
         return [
-            'state' => $value->value
+            'state' => $value->value,
         ];
     }
 }

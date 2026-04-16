@@ -30,9 +30,7 @@ jobs:
         run: composer install --prefer-dist --no-interaction --no-progress
 
       - name: Code sniff
-        run: vendor/bin/php-cs-fixer fix --dry-run
-        env:
-          PHP_CS_FIXER_IGNORE_ENV: true
+        run: vendor/bin/pint --test
 
       - name: Execute tests
         run: composer test

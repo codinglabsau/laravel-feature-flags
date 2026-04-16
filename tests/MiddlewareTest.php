@@ -15,7 +15,7 @@ beforeEach(function () {
 
     Route::get('test-middleware', function () {
         return 'ok';
-    })->middleware(VerifyFeatureIsOn::class . ':some-feature');
+    })->middleware(VerifyFeatureIsOn::class.':some-feature');
 
     cache()->store('array')->clear();
 });
@@ -36,7 +36,7 @@ it('returns a 500 status when a feature does not exist', function () {
 it('returns a 404 status when a feature is off', function () {
     Feature::factory()->create([
         'name' => 'some-feature',
-        'state' => FeatureState::off()
+        'state' => FeatureState::off(),
     ]);
 
     $this->get('test-middleware')
@@ -46,7 +46,7 @@ it('returns a 404 status when a feature is off', function () {
 it('returns a 404 status when a feature is dynamic', function () {
     Feature::factory()->create([
         'name' => 'some-feature',
-        'state' => FeatureState::dynamic()
+        'state' => FeatureState::dynamic(),
     ]);
 
     $this->get('test-middleware')
@@ -56,7 +56,7 @@ it('returns a 404 status when a feature is dynamic', function () {
 it('returns an ok status when a feature is dynamic and enabled', function () {
     Feature::factory()->create([
         'name' => 'some-feature',
-        'state' => FeatureState::dynamic()
+        'state' => FeatureState::dynamic(),
     ]);
 
     FeatureFlag::registerDynamicHandler('some-feature', fn ($feature) => true);
@@ -68,7 +68,7 @@ it('returns an ok status when a feature is dynamic and enabled', function () {
 it('returns an ok status when a feature is on', function () {
     Feature::factory()->create([
         'name' => 'some-feature',
-        'state' => FeatureState::on()
+        'state' => FeatureState::on(),
     ]);
 
     $this->get('test-middleware')
