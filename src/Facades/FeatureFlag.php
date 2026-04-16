@@ -3,10 +3,11 @@
 namespace Codinglabs\FeatureFlags\Facades;
 
 use Illuminate\Support\Facades\Facade;
+use Codinglabs\FeatureFlags\FeatureFlags;
 use Codinglabs\FeatureFlags\Enums\FeatureState;
 
 /**
- * @see \Codinglabs\FeatureFlags\FeatureFlags
+ * @see FeatureFlags
  *
  * @method static bool isOn(string $feature)
  * @method static bool isOff(string $feature)

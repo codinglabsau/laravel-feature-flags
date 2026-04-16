@@ -14,7 +14,7 @@ class SyncFeaturesAction
                 'name' => $name,
                 'state' => app()->environment(config('feature-flags.always_on', []))
                     ? FeatureState::on()
-                    : $state
+                    : $state,
             ]);
 
         $featureModels = config('feature-flags.feature_model')::all();

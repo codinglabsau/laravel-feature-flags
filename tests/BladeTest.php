@@ -23,7 +23,7 @@ afterEach(function () {
 it('does not reveal things when feature is off', function () {
     Feature::factory()->create([
         'name' => 'some-feature',
-        'state' => FeatureState::off()
+        'state' => FeatureState::off(),
     ]);
 
     $view = $this->blade("@feature('some-feature') secret things @endfeature");
@@ -34,7 +34,7 @@ it('does not reveal things when feature is off', function () {
 it('reveals things when feature is on ', function () {
     Feature::factory()->create([
         'name' => 'some-feature',
-        'state' => FeatureState::on()
+        'state' => FeatureState::on(),
     ]);
 
     $view = $this->blade("@feature('some-feature') secret things @endfeature");

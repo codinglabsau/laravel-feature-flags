@@ -20,7 +20,7 @@ class FeatureFlagsServiceProvider extends PackageServiceProvider
     public function packageRegistered()
     {
         $this->app->singleton('features', function () {
-            return new FeatureFlags();
+            return new FeatureFlags;
         });
     }
 

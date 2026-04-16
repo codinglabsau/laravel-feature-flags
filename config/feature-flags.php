@@ -1,5 +1,7 @@
 <?php
 
+use Codinglabs\FeatureFlags\Models\Feature;
+
 return [
 
     /*
@@ -47,6 +49,6 @@ return [
     | them out by replacing the default models defined here.
     */
 
-    'feature_model' => \Codinglabs\FeatureFlags\Models\Feature::class,
+    'feature_model' => Feature::class,
 
 ];

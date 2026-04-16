@@ -20,7 +20,7 @@ afterEach(function () {
 });
 
 it('throws an exception if casting to a feature state that does not exist', function () {
-    $this->expectException(\InvalidArgumentException::class);
+    $this->expectException(InvalidArgumentException::class);
 
     Feature::factory()->create([
         'name' => 'some-feature',
@@ -61,7 +61,7 @@ it('handles a missing feature exception when a global handler has been defined',
 it('resolves isOn to false when the features state is "off"', function () {
     Feature::factory()->create([
         'name' => 'some-feature',
-        'state' => FeatureState::off()
+        'state' => FeatureState::off(),
     ]);
 
     expect(FeatureFlag::isOn('some-feature'))->toBeFalse()
@@ -72,7 +72,7 @@ it('resolves isOn to false when the features state is "off"', function () {
 it('resolves isOn to true when the features state is "on"', function () {
     Feature::factory()->create([
         'name' => 'some-feature',
-        'state' => FeatureState::on()
+        'state' => FeatureState::on(),
     ]);
 
     expect(FeatureFlag::isOn('some-feature'))->toBeTrue()
@@ -134,15 +134,15 @@ it('resolves isOn to false when feature state is "dynamic" and no dynamic closur
 it('resolves the current state', function () {
     Feature::factory()->create([
         'name' => 'some-off-feature',
-        'state' => FeatureState::off()
+        'state' => FeatureState::off(),
     ]);
     Feature::factory()->create([
         'name' => 'some-dynamic-feature',
-        'state' => FeatureState::dynamic()
+        'state' => FeatureState::dynamic(),
     ]);
     Feature::factory()->create([
         'name' => 'some-on-feature',
-        'state' => FeatureState::on()
+        'state' => FeatureState::on(),
     ]);
 
     expect(FeatureFlag::getState('some-off-feature'))->toBe(FeatureState::off())
@@ -155,7 +155,7 @@ it('can turn on a feature', function () {
 
     Feature::factory()->create([
         'name' => 'some-feature',
-        'state' => FeatureState::off()
+        'state' => FeatureState::off(),
     ]);
 
     cache()->store('array')->set('testing.some-feature', 'off');
@@ -173,7 +173,7 @@ it('can turn off a feature', function () {
 
     Feature::factory()->create([
         'name' => 'some-feature',
-        'state' => FeatureState::on()
+        'state' => FeatureState::on(),
     ]);
 
     cache()->store('array')->set('testing.some-feature', 'on');
@@ -191,7 +191,7 @@ it('can make a feature dynamic', function () {
 
     Feature::factory()->create([
         'name' => 'some-feature',
-        'state' => FeatureState::on()
+        'state' => FeatureState::on(),
     ]);
 
     cache()->store('array')->set('testing.some-feature', 'on');
@@ -209,7 +209,7 @@ it('can update a features state', function () {
 
     Feature::factory()->create([
         'name' => 'some-feature',
-        'state' => FeatureState::off()
+        'state' => FeatureState::off(),
     ]);
 
     cache()->store('array')->set('testing.some-feature', 'off');

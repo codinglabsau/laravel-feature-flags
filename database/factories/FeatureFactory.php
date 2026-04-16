@@ -18,7 +18,7 @@ class FeatureFactory extends Factory
                 FeatureState::on()->value,
                 FeatureState::off()->value,
                 FeatureState::dynamic()->value,
-            ])
+            ]),
         ];
     }
 }
