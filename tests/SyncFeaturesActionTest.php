@@ -151,7 +151,7 @@ it('syncs scope as null when using simple config format', function () {
         ],
     ]);
 
-    (new SyncFeaturesAction())->__invoke();
+    (new SyncFeaturesAction)->__invoke();
 
     $this->assertDatabaseHas('features', [
         'name' => 'some-feature',
@@ -170,7 +170,7 @@ it('syncs scope when using rich config format', function () {
         ],
     ]);
 
-    (new SyncFeaturesAction())->__invoke();
+    (new SyncFeaturesAction)->__invoke();
 
     $this->assertDatabaseHas('features', [
         'name' => 'some-feature',
@@ -190,7 +190,7 @@ it('supports mixed simple and rich config formats', function () {
         ],
     ]);
 
-    (new SyncFeaturesAction())->__invoke();
+    (new SyncFeaturesAction)->__invoke();
 
     $this->assertDatabaseCount('features', 2);
 
@@ -221,7 +221,7 @@ it('updates scope on re-sync when config changes', function () {
         ],
     ]);
 
-    (new SyncFeaturesAction())->__invoke();
+    (new SyncFeaturesAction)->__invoke();
 
     $this->assertDatabaseHas('features', [
         'name' => 'some-feature',
@@ -242,7 +242,7 @@ it('resolves backed enum scope values', function () {
         ],
     ]);
 
-    (new SyncFeaturesAction())->__invoke();
+    (new SyncFeaturesAction)->__invoke();
 
     $this->assertDatabaseHas('features', [
         'name' => 'some-feature',
@@ -260,7 +260,7 @@ it('syncs description when using rich config format', function () {
         ],
     ]);
 
-    (new SyncFeaturesAction())->__invoke();
+    (new SyncFeaturesAction)->__invoke();
 
     $this->assertDatabaseHas('features', [
         'name' => 'some-feature',
@@ -275,7 +275,7 @@ it('syncs description as null when using simple config format', function () {
         ],
     ]);
 
-    (new SyncFeaturesAction())->__invoke();
+    (new SyncFeaturesAction)->__invoke();
 
     $this->assertDatabaseHas('features', [
         'name' => 'some-feature',
@@ -299,7 +299,7 @@ it('updates description on re-sync when config changes', function () {
         ],
     ]);
 
-    (new SyncFeaturesAction())->__invoke();
+    (new SyncFeaturesAction)->__invoke();
 
     $this->assertDatabaseHas('features', [
         'name' => 'some-feature',
