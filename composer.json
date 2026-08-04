@@ -56,7 +56,7 @@
                 "Codinglabs\\FeatureFlags\\FeatureFlagsServiceProvider"
             ],
             "aliases": {
-                "FeatureFlag": "Codinglabs\\FeatureFlags\\Facades\\FeatureFlags"
+                "FeatureFlag": "Codinglabs\\FeatureFlags\\Facades\\FeatureFlag"
             }
         }
     },
